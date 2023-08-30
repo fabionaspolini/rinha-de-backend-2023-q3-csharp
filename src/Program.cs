@@ -44,6 +44,7 @@ app.MapGet("/pessoas", (string? t) =>
         .Where(x => x.Value.Apelido.ToLower().Contains(lower)
             || x.Value.Nome.ToLower().Contains(lower)
             || (x.Value.Stack != null && x.Value.Stack.Any(y => y.ToLower().Contains(lower))))
+        .Take(50)
         .Select(x => x.Value)
         .ToArray();
     return Results.Ok(result);
