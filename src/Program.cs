@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Mvc;
 using RinhaBackend2023Q3;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,10 +6,16 @@ var app = builder.Build();
 
 var db = new ConcurrentDictionary<Guid, PessoaGetModel>();
 
+app.UseExceptionHandler(exceptionHandlerApp
+    => exceptionHandlerApp.Run(async context
+        => await Results.UnprocessableEntity("Erro inesperado.").ExecuteAsync(context)));
+
 app.MapPost("/pessoas", (PessoaPostModel request) =>
 {
     if (db.Any(x => x.Value.Apelido == request.Apelido))
-        return Results.UnprocessableEntity("Apelido duplicado");
+        return Results.UnprocessableEntity("Apelido duplicado.");
+    if (request.Apelido == null || request.Nome == null)
+        return Results.UnprocessableEntity("Atributo obrigatório não informado.");
     var model = new PessoaGetModel(
         Id: Guid.NewGuid(),
         Apelido: request.Apelido,
@@ -31,10 +36,14 @@ app.MapGet("/pessoas/{id}", (Guid id) =>
 
 app.MapGet("/pessoas", (string? t) =>
 {
-    if (t == null)
-        return Results.Ok(db.Select(x => x.Value).ToArray());
+    if (string.IsNullOrWhiteSpace(t))
+        return Results.BadRequest("Termo é obrigatório");
+
+    var lower = t.ToLower();
     var result = db
-        .Where(x => x.Value.Apelido.Contains(t) || x.Value.Nome.Contains(t) || x.Value.Stack.Contains(t))
+        .Where(x => x.Value.Apelido.ToLower().Contains(lower)
+            || x.Value.Nome.ToLower().Contains(lower)
+            || (x.Value.Stack != null && x.Value.Stack.Any(y => y.ToLower().Contains(lower))))
         .Select(x => x.Value)
         .ToArray();
     return Results.Ok(result);
