@@ -2,6 +2,9 @@ using System.Collections.Concurrent;
 using RinhaBackend2023Q3;
 
 var builder = WebApplication.CreateBuilder(args);
+#if !DEBUG
+builder.Services.AddLogging(builder => builder.ClearProviders());
+#endif
 var app = builder.Build();
 
 var db = new ConcurrentDictionary<Guid, PessoaGetModel>();

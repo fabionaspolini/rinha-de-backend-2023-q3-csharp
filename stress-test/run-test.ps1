@@ -2,7 +2,8 @@
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 # Set the GATLING_HOME environment variable
-$Env:GATLING_HOME = Join-Path $ScriptDir "gatling"
+# $Env:GATLING_HOME = Join-Path $ScriptDir "gatling"
+$Env:GATLING_HOME = "C:\Tools\gatling\3.9.5"
 
 $GatlingBinDir = Join-Path $Env:GATLING_HOME "bin"
 $Workspace = $ScriptDir
